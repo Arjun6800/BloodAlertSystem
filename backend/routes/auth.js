@@ -58,33 +58,40 @@ router.post('/login', [
   body('password').exists()
 ], async (req, res) => {
   try {
+    console.log('Login attempt:', req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
     const { email, password } = req.body;
+    console.log('Finding user with email:', email);
 
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
+      console.log('User not found for email:', email);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      console.log('Invalid password for user:', email);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Check if user is active
     if (!user.isActive) {
+      console.log('User account is deactivated:', email);
       return res.status(401).json({ message: 'Account is deactivated' });
     }
 
     // Update last login
     user.lastLogin = new Date();
     await user.save();
+    console.log('User lastLogin updated:', user.lastLogin);
 
     // Generate token
     const token = jwt.sign(
@@ -92,13 +99,16 @@ router.post('/login', [
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
+    console.log('JWT token generated for user:', user._id);
 
     // Get profile data based on role
     let profileData = null;
     if (user.role === 'donor') {
       profileData = await Donor.findOne({ user: user._id });
+      console.log('Donor profile data:', profileData);
     } else if (user.role === 'hospital' || user.role === 'blood_bank') {
       profileData = await Hospital.findOne({ user: user._id });
+      console.log('Hospital/Blood Bank profile data:', profileData);
     }
 
     res.json({
@@ -113,6 +123,7 @@ router.post('/login', [
       profile: profileData
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

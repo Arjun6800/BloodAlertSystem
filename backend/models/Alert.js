@@ -231,7 +231,6 @@ const alertSchema = new mongoose.Schema({
 alertSchema.index({ hospital: 1, status: 1 });
 alertSchema.index({ bloodType: 1, status: 1 });
 alertSchema.index({ urgencyLevel: 1, status: 1 });
-alertSchema.index({ expiresAt: 1 });
 alertSchema.index({ 'location.coordinates': '2dsphere' });
 alertSchema.index({ createdAt: -1 });
 

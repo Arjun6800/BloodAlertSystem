@@ -22,48 +22,58 @@ const DonorSetup = () => {
 
   const onSubmit = async (data) => {
     setIsLoading(true);
-
     try {
-      // Format the data according to the Donor model
+      // Transform data to match backend Donor schema
       const donorData = {
-        profile: {
-          fullName: data.fullName,
-          phone: data.phone,
+        personalInfo: {
+          firstName: data.fullName?.split(' ')[0] || '',
+          lastName: data.fullName?.split(' ').slice(1).join(' ') || '',
           dateOfBirth: data.dateOfBirth,
           gender: data.gender,
-          bloodGroup: data.bloodGroup,
-          weight: parseFloat(data.weight),
-          address: {
-            street: data.street,
-            city: data.city,
-            state: data.state,
-            zipCode: data.zipCode,
-            coordinates: [], // Will be set by geolocation or geocoding
-          },
+          phone: data.phone,
           emergencyContact: {
             name: data.emergencyContactName,
             phone: data.emergencyContactPhone,
             relationship: data.emergencyContactRelationship,
           },
         },
-        preferences: {
-          maxTravelDistance: parseInt(data.maxTravelDistance),
-          preferredDonationDays: data.preferredDonationDays || [],
-          availableTimeSlots: data.availableTimeSlots || [],
-          receiveEmailAlerts: data.receiveEmailAlerts,
-          receiveSMSAlerts: data.receiveSMSAlerts,
-        },
         medicalInfo: {
+          bloodGroup: data.bloodGroup,
+          weight: parseFloat(data.weight),
+          height: data.height ? parseFloat(data.height) : 170, // Default height if not provided
           allergies: data.allergies ? data.allergies.split(',').map(a => a.trim()) : [],
           medications: data.medications ? data.medications.split(',').map(m => m.trim()) : [],
-          chronicConditions: data.chronicConditions ? data.chronicConditions.split(',').map(c => c.trim()) : [],
-          lastDonationDate: data.lastDonationDate || null,
-          tattooPiercingDate: data.tattooPiercingDate || null,
-          recentTravel: data.recentTravel || false,
-          travelDetails: data.travelDetails || '',
+          medicalConditions: data.chronicConditions ? data.chronicConditions.split(',').map(c => c.trim()) : [],
+          lastMedicalCheckup: null,
+          isDiabetic: false,
+          hasHeartCondition: false,
+          hasInfectiousDisease: false
+        },
+        location: {
+          address: {
+            street: data.street,
+            city: data.city,
+            state: data.state,
+            zipCode: data.zipCode,
+            country: 'India',
+          },
+          coordinates: {
+            type: 'Point',
+            coordinates: [0, 0], // You can update this with real geolocation if available
+          },
+        },
+        preferences: {
+          notificationMethods: {
+            email: data.receiveEmailAlerts ?? true,
+            sms: data.receiveSMSAlerts ?? true,
+            push: true,
+          },
+          maxTravelDistance: parseInt(data.maxTravelDistance),
+          availableDays: Array.isArray(data.preferredDonationDays) ? data.preferredDonationDays.map(d => d.toLowerCase()) : [],
+          availableTimeSlots: Array.isArray(data.availableTimeSlots) ? data.availableTimeSlots.map(slot => ({ start: slot.split(' ')[0], end: slot.split(' ')[2] || '' })) : [],
+          emergencyOnly: false,
         },
       };
-
       await updateProfile(donorData);
       toast.success('Profile setup completed successfully!');
       navigate('/donor/dashboard');
