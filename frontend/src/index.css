@@ -1,4 +1,27 @@
+/* Custom styles */
 @import "tailwindcss";
+
+@theme {
+  --color-blood-50: #fef2f2;
+  --color-blood-100: #fee2e2;
+  --color-blood-200: #fecaca;
+  --color-blood-300: #fca5a5;
+  --color-blood-400: #f87171;
+  --color-blood-500: #ef4444;
+  --color-blood-600: #dc2626;
+  --color-blood-700: #b91c1c;
+  --color-blood-800: #991b1b;
+  --color-blood-900: #7f1d1d;
+  --color-blood-950: #450a0a;
+
+  --animate-pulse-slow: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  @keyframes pulse-slow {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
+
 
 /* Custom styles */
 @layer base {
